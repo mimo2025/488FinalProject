@@ -20,4 +20,3 @@ class BrandPerceptionModel(nn.Module):
         aspect_logits = self.aspect_classifier(pooled_output)
         
         return aspect_logits, emotion_outputs.logits
-
