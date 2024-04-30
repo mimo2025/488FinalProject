@@ -14,8 +14,12 @@ class BrandPerceptionModel(nn.Module):
     def forward(self, input_ids, attention_mask):
         # Emotion classification
         emotion_outputs = self.emotion_model(input_ids=input_ids, attention_mask=attention_mask)
-        pooled_output = emotion_outputs.pooler_output
         
+        # Use the last hidden state
+        last_hidden_state = emotion_outputs.last_hidden_state
+        # You might want to apply pooling here, for example, mean pooling
+        pooled_output = torch.mean(last_hidden_state, dim=1)
+
         # Aspect identification
         aspect_logits = self.aspect_classifier(pooled_output)
         
