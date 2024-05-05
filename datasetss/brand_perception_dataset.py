@@ -4,10 +4,11 @@ from transformers import RobertaTokenizer
 
 
 class BrandPerceptionDataset(Dataset):
-    def __init__(self, texts, emotion_labels, brand_labels):
+    def __init__(self, texts, emotion_labels=None, brand_labels=None):
         self.texts = texts
-        self.emotion_labels = torch.tensor(emotion_labels, dtype=torch.float32)
-        self.brand_labels = torch.tensor(brand_labels, dtype=torch.float32)
+        # If no labels are provided, create zero labels
+        self.emotion_labels = torch.zeros((len(texts), 28)) if emotion_labels is None else torch.tensor(emotion_labels, dtype=torch.float32)
+        self.brand_labels = torch.zeros((len(texts), 6)) if brand_labels is None else torch.tensor(brand_labels, dtype=torch.float32)
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
 
     def __len__(self):

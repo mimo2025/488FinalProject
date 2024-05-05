@@ -1,46 +1,62 @@
-from transformers import AutoTokenizer
+import sys
+import os
+import torch
+from torch.utils.data import DataLoader
+import pickle
+import pytorch_lightning as pl
 from modules.BrandPerceptionModel import BrandPerceptionModel
-from brand_perception_data_module import BrandPerceptionDataModule
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from transformers import AutoTokenizer
-from pytorch_lightning import Trainer
+
+# Clear any previous GPU memory
+torch.cuda.empty_cache()
+
+# Add the parent directory to the system path
+parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(parent_directory)
 
 print("Starting")
 
-# Load data
-print("Loading data")
-df = pd.read_csv('Labeled_Df.csv')
-train_df, val_df = train_test_split(df, test_size=0.2, random_state=42, shuffle=True)
+# Load Dataset
+print("Loading datasets")
+with open('/nas/longleaf/home/aryonna/488FinalProject/datasetss/train_dataset.pkl', 'rb') as f:
+    train_dataset = pickle.load(f)
 
-# Initialize data module
-print("Initializing data module")
-brand_perception_dm = BrandPerceptionDataModule(train_df, val_df)
+with open('/nas/longleaf/home/aryonna/488FinalProject/datasetss/val_dataset.pkl', 'rb') as f:
+    val_dataset = pickle.load(f)
+
+print('Creating dataloaders')
+train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
 
 # Configurations
 config = {
     'model_name': 'SamLowe/roberta-base-go_emotions',
     'n_labels_bp': 6,
-    'lr': 1.5e-6,
+    'batch_size': 8,
+    'lr': 1.5e-5,
+    'warmup': 0.2, 
+    'train_size': len(train_loader),
     'weight_decay': 0.001,
-    'warmup': 0.2,
-    'train_size': len(train_df),
-    'batch_size': 128,
-    'n_epochs': 100
+    'n_epochs': 10
 }
 
-# Initialize model
-print("Initizlaing model")
-model = BrandPerceptionModel(config)
-# Initialize the trainer with GPU configuration
-print("Initizlaing trainer")
-trainer = Trainer(
-    max_epochs=config['n_epochs'],
-    num_sanity_val_steps=50,
-    accelerator='gpu',  # Automatically choose the best backend (GPU/CPU)
-    strategy='ddp'  # Use data parallelism
+print('Loading model from checkpoint')
+model = BrandPerceptionModel.load_from_checkpoint(
+    "/nas/longleaf/home/aryonna/488FinalProject/models/brand_perception_model_checkpoint.ckpt",
+    config=config
 )
 
-# Start training
-print("Starting trainer")
-trainer.fit(model, brand_perception_dm)
+accumulation_steps = 2
+
+trainer = pl.Trainer(
+    max_epochs=config['n_epochs'],
+    accelerator='gpu' if torch.cuda.is_available() else 'cpu',
+    precision=16,  # Mixed precision
+    accumulate_grad_batches=accumulation_steps
+)
+
+print("Beginning training")
+trainer.fit(model, train_loader, val_loader)
+
+# Save new model
+print("Saving model")
+trainer.save_checkpoint("/nas/longleaf/home/aryonna/488FinalProject/models/brand_perception_model_checkpoint.ckpt")

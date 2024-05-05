@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task=4  # Adjust to leverage parallel computation
 #SBATCH -p gpu
 #SBATCH --mem=32g
-#SBATCH -t 24:00:00
+#SBATCH -t 1:00:00
 #SBATCH --qos gpu_access
 #SBATCH --gres=gpu:1
 #SBATCH --mail-type=all
