@@ -33,3 +33,30 @@ To set up the environment for this project, follow these steps:
   - On Windows, use 488env\Scripts\activate.
   - On Unix or MacOS, use source 488env/bin/activate.
 4) Install the required dependencies by running pip install -r requirements.txt.
+
+## Project Layout
+
+Here’s an overview of the project structure. There are other files in the directories but the ones that you must download from our google drive are shown below:
+
+```plaintext
+.
+├── README.md                         # Project documentation
+├── data                              # Tiktok comments, captions, labeled data, etc
+├── datasetss                         # Dataset module
+    └── test_dataset.pkl
+    └── train_dataset.pkl
+    └── val_dataset.pkl                     
+├── models                            # Training and evaluation scripts
+│   ├── brand_perception_model.ckpt   # Model checkpoint
+├── modules              
+├── notebooks                         # Data cleaning and model usage notebooks
+├── results
+    └── probs.pkl
+└── requirements.txt                  # Python dependencies
+
+```
+
+Download the files for datasetss from here: https://drive.google.com/drive/folders/1iC4z-JkXZJJQZbU2YDyWWW7V6xRMUIDZ?usp=sharing
+Download the files for models from here: https://drive.google.com/drive/folders/1q6YTiovFxuWLoKvIIsvaExKHvpT_j5i5?usp=sharing
+Download the files for results from here: https://drive.google.com/drive/folders/1PsNPpz8p5TPU5Uf98JW-H5IMDIiBsSkX?usp=sharing
+
