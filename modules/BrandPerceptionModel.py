@@ -6,7 +6,6 @@ import pytorch_lightning as pl
 import torch.nn.functional as F
 from torchmetrics.classification import MultilabelAccuracy, MultilabelF1Score
 
-
 class BrandPerceptionModel(pl.LightningModule):
     def __init__(self, config: dict):
         super().__init__()
